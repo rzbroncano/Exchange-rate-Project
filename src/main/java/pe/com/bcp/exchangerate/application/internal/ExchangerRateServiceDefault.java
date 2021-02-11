@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,13 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 import pe.com.bcp.exchangerate.application.ExchangerService;
+import pe.com.bcp.exchangerate.application.assembler.ExchangeRateAssembler;
+import pe.com.bcp.exchangerate.application.exceptions.ExchangeRateExistException;
+import pe.com.bcp.exchangerate.application.exceptions.ExchangeRateNotFoundException;
 import pe.com.bcp.exchangerate.domain.ExchangeRate;
 import pe.com.bcp.exchangerate.infrastructure.jpa.JpaExchangeRateRepository;
-import pe.com.bcp.exchangerate.view.dto.request.ExchangeRateRequest;
+import pe.com.bcp.exchangerate.view.dto.request.ExchangeRateApplyRequest;
+import pe.com.bcp.exchangerate.view.dto.request.ExchangeRateCreateRequest;
 import pe.com.bcp.exchangerate.view.dto.request.ExchangeRateUpdateRequest;
 import pe.com.bcp.exchangerate.view.dto.response.ExchangeRateResponse;
 
@@ -28,47 +31,41 @@ public class ExchangerRateServiceDefault implements ExchangerService {
 	private JpaExchangeRateRepository jpaExchangeRateRepository;
 
 	@Override
-	public Single<ExchangeRate> create(ExchangeRateRequest exchangeRateRequest) {
+	public Single<ExchangeRate> create(ExchangeRateCreateRequest exchangeRateCreateRequest) {
 		return Single.create(singleSubscriber -> {
-			Optional<ExchangeRate> element = jpaExchangeRateRepository.fromByNameFromCurrencyAndNameToCurrencyAndDate(
-					exchangeRateRequest.getSourceCurrency(), exchangeRateRequest.getTargetCurrency(),
-					exchangeRateRequest.getDate());
+			Optional<ExchangeRate> element = jpaExchangeRateRepository
+					.findByCodeSourceCurrencyAndCodeTargetCurrencyAndDate(exchangeRateCreateRequest.getSourceCurrency(),
+							exchangeRateCreateRequest.getTargetCurrency(), exchangeRateCreateRequest.getDate());
 			if (element.isPresent()) {
-				log.info("Elemento ya existente.");
-				singleSubscriber.onError(new EntityExistsException());
+				singleSubscriber.onError(new ExchangeRateExistException("Ya existe un tipo de cambio con la moneda origen, moneda destino y fecha ingresadas."));
 			} else {
-				log.info("Elemento para guardar");
-				ExchangeRate exchangeRate = jpaExchangeRateRepository.save(toExchangeRate(exchangeRateRequest));
+				ExchangeRate exchangeRate = jpaExchangeRateRepository
+						.save(ExchangeRateAssembler.fromDTO(exchangeRateCreateRequest));
 				singleSubscriber.onSuccess(exchangeRate);
 			}
 		});
 	}
 
-	private ExchangeRate toExchangeRate(ExchangeRateRequest exchangeRateRequest) {
-		ExchangeRate modelExchangeRate = new ExchangeRate();
-		modelExchangeRate.setCodeSourceCurrency(exchangeRateRequest.getSourceCurrency());
-		modelExchangeRate.setCodeTargetCurrency(exchangeRateRequest.getTargetCurrency());
-		modelExchangeRate.setValueExchangeRate(exchangeRateRequest.getAmount());
-		modelExchangeRate.setDate(exchangeRateRequest.getDate());
-
-		return modelExchangeRate;
-	}
-
 	@Override
-	public Single<ExchangeRateResponse> apply(ExchangeRateRequest exchangeRateRequest) {
-		log.trace("Init generateExchangeRate");
+	public Single<ExchangeRateResponse> apply(ExchangeRateApplyRequest exchangeRateRequest) {
+
 		return Single.create(singleSubscriber -> {
-			Optional<ExchangeRate> element = jpaExchangeRateRepository.fromByNameFromCurrencyAndNameToCurrencyAndDate(
-					exchangeRateRequest.getSourceCurrency(), exchangeRateRequest.getTargetCurrency(),
-					exchangeRateRequest.getDate());
-			if (!element.isPresent()) {
-				singleSubscriber.onError(new EntityNotFoundException());
-			}
+			Optional<ExchangeRate> exchangeRateCurrent = jpaExchangeRateRepository
+					.findByCodeSourceCurrencyAndCodeTargetCurrencyAndDate(exchangeRateRequest.getSourceCurrency(),
+							exchangeRateRequest.getTargetCurrency(), exchangeRateRequest.getDate());
+
+			if (!exchangeRateCurrent.isPresent())
+				singleSubscriber.onError(new ExchangeRateNotFoundException("No existe tipo de cambio con la moneda origen, moneda destino y fecha ingresadas."));
+
 			ExchangeRateResponse response = ExchangeRateResponse.builder().amount(exchangeRateRequest.getAmount())
 					.sourceCurrency(exchangeRateRequest.getSourceCurrency())
 					.targetCurrency(exchangeRateRequest.getTargetCurrency())
-					.amountExchangeRate(element.get().getValueExchangeRate().multiply(exchangeRateRequest.getAmount()))
-					.valueExchangeRate(element.get().getValueExchangeRate()).build();
+					.amountExchangeRateBuy(exchangeRateCurrent.get().getValueExchangeRateBuy()
+							.multiply(exchangeRateRequest.getAmount()))
+					.amountExchangeRateSell(exchangeRateCurrent.get().getValueExchangeRateSell()
+							.multiply(exchangeRateRequest.getAmount()))
+					.valueExchangeRateBuy(exchangeRateCurrent.get().getValueExchangeRateBuy())
+					.valueExchangeRateSell(exchangeRateCurrent.get().getValueExchangeRateSell()).build();
 
 			singleSubscriber.onSuccess(response);
 		});
@@ -91,7 +88,6 @@ public class ExchangerRateServiceDefault implements ExchangerService {
 	@Override
 	public Completable update(ExchangeRateUpdateRequest exchangeRateUpdateRequest) {
 		return Completable.create(completableSubscriber -> {
-//			Optional<ExchangeRate> element = jpaExchangeRateRepository.findById(exchangeRateUpdateRequest.getId());
 			Optional<ExchangeRate> element = jpaExchangeRateRepository
 					.findByCodeSourceCurrencyAndCodeTargetCurrencyAndDate(exchangeRateUpdateRequest.getSourceCurrency(),
 							exchangeRateUpdateRequest.getTargetCurrency(), exchangeRateUpdateRequest.getDate());
@@ -99,11 +95,12 @@ public class ExchangerRateServiceDefault implements ExchangerService {
 				ExchangeRate exRate = element.get();
 				exRate.setCodeSourceCurrency(exchangeRateUpdateRequest.getSourceCurrency());
 				exRate.setCodeTargetCurrency(exchangeRateUpdateRequest.getTargetCurrency());
-				exRate.setValueExchangeRate(exchangeRateUpdateRequest.getAmount());
+				exRate.setValueExchangeRateBuy(exchangeRateUpdateRequest.getBuyAmount());
+				exRate.setValueExchangeRateSell(exchangeRateUpdateRequest.getSellAmount());
 				jpaExchangeRateRepository.save(exRate);
 				completableSubscriber.onComplete();
 			} else {
-				completableSubscriber.onError(new EntityNotFoundException());
+				completableSubscriber.onError(new ExchangeRateNotFoundException("No existe tipo de cambio con la moneda origen, moneda destino y fecha ingresadas."));
 			}
 		});
 	}

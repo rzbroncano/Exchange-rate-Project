@@ -25,14 +25,18 @@ public class ExchangeRate {
 	@Column(name = "ID")
 	private Integer id;
 
-	@Column(name = "CODESOURCECURRENCY")
+	@Column(name = "CODE_SOURCE_CURRENCY")
 	private String codeSourceCurrency;
-	@Column(name = "CODETARGETCURRENCY")
+	@Column(name = "CODE_TARGET_CURRENCY")
 	private String codeTargetCurrency;
 
-	@Column(name = "VALUEEXCHANGERATE")
-	private BigDecimal valueExchangeRate;
+	@Column(name = "VALUE_EXCHANGERATE_SELL",precision = 16, scale = 5)
+	private BigDecimal valueExchangeRateSell;
+	
+	@Column(name = "VALUE_EXCHANGERATE_BUY",precision = 16, scale = 5)
+	private BigDecimal valueExchangeRateBuy;
+	
 	@Column(name = "DATE")
 	private String date;
-
+	
 }

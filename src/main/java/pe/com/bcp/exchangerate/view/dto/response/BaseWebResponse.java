@@ -10,10 +10,7 @@ public class BaseWebResponse<T> {
     private ErrorCode errorCode;
     private T data;
 
-    public static BaseWebResponse successNoData() {
-        return BaseWebResponse.builder()
-                .build();
-    }
+
 
     public static <T> BaseWebResponse<T> successWithData(T data) {
         return BaseWebResponse.<T>builder()
@@ -21,9 +18,10 @@ public class BaseWebResponse<T> {
                 .build();
     }
 
-    public static BaseWebResponse error(ErrorCode errorCode) {
+    public static BaseWebResponse error(ErrorCode errorCode, String data) {
         return BaseWebResponse.builder()
                 .errorCode(errorCode)
+                .data(data)
                 .build();
     }
 }

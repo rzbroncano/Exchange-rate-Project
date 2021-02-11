@@ -1,6 +1,10 @@
-INSERT INTO exchange_rates (codeSourceCurrency, codeTargetCurrency, valueExchangeRate, date) values ('USD', 'PEN', 3.63767, '11/02/2021');
-INSERT INTO exchange_rates (codeSourceCurrency, codeTargetCurrency, valueExchangeRate, date) values ('EUR', 'PEN', 4.40999, '11/02/2021');
-INSERT INTO exchange_rates (codeSourceCurrency, codeTargetCurrency, valueExchangeRate, date) values ('MXN', 'PEN', 0.18176, '11/02/2021');
-INSERT INTO exchange_rates (codeSourceCurrency, codeTargetCurrency, valueExchangeRate, date) values ('COP', 'PEN', 0.00102, '11/02/2021');
-INSERT INTO exchange_rates (codeSourceCurrency, codeTargetCurrency, valueExchangeRate, date) values ('CLP', 'PEN', 0.00502, '11/02/2021');
-INSERT INTO exchange_rates (codeSourceCurrency, codeTargetCurrency, valueExchangeRate, date) values ('GBP', 'PEN', 5.03770, '11/02/2021');
+INSERT INTO exchange_rates (CODE_SOURCE_CURRENCY, CODE_TARGET_CURRENCY, VALUE_EXCHANGERATE_SELL,VALUE_EXCHANGERATE_BUY, date) values ('USD', 'PEN', 3.63767, 3.63767, '11/02/2021');
+INSERT INTO exchange_rates (CODE_SOURCE_CURRENCY, CODE_TARGET_CURRENCY, VALUE_EXCHANGERATE_SELL,VALUE_EXCHANGERATE_BUY, date) values ('EUR', 'PEN', 4.40999,4.40999, '11/02/2021');
+INSERT INTO exchange_rates (CODE_SOURCE_CURRENCY, CODE_TARGET_CURRENCY, VALUE_EXCHANGERATE_SELL,VALUE_EXCHANGERATE_BUY, date) values ('MXN', 'PEN', 0.18176,0.18176, '11/02/2021');
+INSERT INTO exchange_rates (CODE_SOURCE_CURRENCY, CODE_TARGET_CURRENCY, VALUE_EXCHANGERATE_SELL,VALUE_EXCHANGERATE_BUY, date) values ('COP', 'PEN', 0.00102,0.00102, '11/02/2021');
+INSERT INTO exchange_rates (CODE_SOURCE_CURRENCY, CODE_TARGET_CURRENCY, VALUE_EXCHANGERATE_SELL,VALUE_EXCHANGERATE_BUY, date) values ('CLP', 'PEN', 0.00502,0.00502, '11/02/2021');
+INSERT INTO exchange_rates (CODE_SOURCE_CURRENCY, CODE_TARGET_CURRENCY, VALUE_EXCHANGERATE_SELL,VALUE_EXCHANGERATE_BUY, date) values ('GBP', 'PEN', 5.03770,5.03770, '11/02/2021');
+
+
+INSERT INTO application_users (username, password) VALUES ('renzo.broncano','$2a$10$ZWEFh.SBfqAYyWcE6UgxIum1lwpdKxwD6XI29rSS8gr/uzraWGDQ2');
+INSERT INTO application_users (username, password) VALUES ('admin.global','$2a$10$ZWEFh.SBfqAYyWcE6UgxIum1lwpdKxwD6XI29rSS8gr/uzraWGDQ2');

@@ -1,29 +1,41 @@
 package pe.com.bcp.exchangerate.view.rest;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import lombok.extern.slf4j.Slf4j;
+import pe.com.bcp.exchangerate.application.exceptions.ApplicationUserNotFound;
+import pe.com.bcp.exchangerate.application.exceptions.BadCredentialsException;
+import pe.com.bcp.exchangerate.application.exceptions.ExchangeRateExistException;
+import pe.com.bcp.exchangerate.application.exceptions.ExchangeRateNotFoundException;
 import pe.com.bcp.exchangerate.view.dto.response.BaseWebResponse;
 import pe.com.bcp.exchangerate.view.dto.response.ErrorCode;
 
-@Slf4j
 @RestControllerAdvice(basePackages = { "pe.com.bcp.exchangerate.view.rest" })
 public class ExchangeControllerAdvice {
+
+	@ExceptionHandler(ExchangeRateExistException.class)
+	public ResponseEntity<BaseWebResponse> handleEntityNotFoundException(ExchangeRateExistException e) {
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(BaseWebResponse.error(ErrorCode.EXCHANGERATE_EXIST, e.getMessage()));
+	}
+
+	@ExceptionHandler(ExchangeRateNotFoundException.class)
+	public ResponseEntity<BaseWebResponse> handleEntityExistsException(ExchangeRateNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.body(BaseWebResponse.error(ErrorCode.EXCHANGERATE_NOT_FOUND, e.getMessage()));
+	}
+
+	@ExceptionHandler(ApplicationUserNotFound.class)
+	public ResponseEntity<BaseWebResponse> handleApplicationUserNotFound(ApplicationUserNotFound e) {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(BaseWebResponse.error(ErrorCode.CREDENTIALS_INVALID, e.getMessage()));
+	}
 	
-	
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<BaseWebResponse> handleEntityNotFoundException() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(BaseWebResponse.error(ErrorCode.ENTITY_NOT_FOUND));
-    }
-    
-    @ExceptionHandler(EntityExistsException.class)
-    public ResponseEntity<BaseWebResponse> handleEntityExistsException() {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(BaseWebResponse.error(ErrorCode.ENTITY_EXIST));
-    }
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<BaseWebResponse> handleBadCredentialsException(BadCredentialsException e) {
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(BaseWebResponse.error(ErrorCode.CREDENTIALS_INVALID, e.getMessage()));
+	}
 }

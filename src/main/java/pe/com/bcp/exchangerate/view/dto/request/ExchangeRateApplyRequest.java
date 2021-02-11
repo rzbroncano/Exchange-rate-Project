@@ -9,11 +9,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ExchangeRateUpdateRequest {
+public class ExchangeRateApplyRequest {
 
+	private BigDecimal amount;
 	private String sourceCurrency;
 	private String targetCurrency;
 	private String date;
-	private BigDecimal sellAmount;
-	private BigDecimal buyAmount;
 }

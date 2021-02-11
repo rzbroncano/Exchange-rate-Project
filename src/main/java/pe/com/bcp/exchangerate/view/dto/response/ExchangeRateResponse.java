@@ -16,8 +16,10 @@ import lombok.Setter;
 public class ExchangeRateResponse {
 
 	private BigDecimal amount;
-	private BigDecimal amountExchangeRate;
 	private String sourceCurrency;
 	private String targetCurrency;
-	private BigDecimal valueExchangeRate;
+	private BigDecimal valueExchangeRateBuy;
+	private BigDecimal amountExchangeRateBuy;
+	private BigDecimal valueExchangeRateSell;
+	private BigDecimal amountExchangeRateSell;
 }
