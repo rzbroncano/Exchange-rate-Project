@@ -75,9 +75,7 @@ public class ExchangerRateServiceDefault implements ExchangerService {
 	public Single<List<ExchangeRate>> listAll() {
 		return Single.create(singleSubscriber -> {
 			List<ExchangeRate> findAll = jpaExchangeRateRepository.findAll();
-
 			if (findAll.isEmpty()) {
-				log.info("Lista vacia");
 				singleSubscriber.onSuccess(new ArrayList<>());
 			} else {
 				singleSubscriber.onSuccess(findAll);
